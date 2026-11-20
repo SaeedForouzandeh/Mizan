@@ -227,11 +227,17 @@ if [ "$MODE" = "aab" ] || [ "$MODE" = "all" ]; then
   # are self-signed by design, and -strict turns that into a fatal error
   # ("PKIX path building failed", exit code 4) even though the AAB is
   # correctly signed. Plain -verify prints "jar verified" (exit 0) for a
-  # correctly signed bundle, and the grep below still fails the build if
+  # correctly signed bundle, and the check below still fails the build if
   # the bundle is unsigned or broken.
+  # NOTE: do NOT check the output with `printf ... | grep -q` here. The
+  # script runs under `set -o pipefail`, and jarsigner prints "jar
+  # verified." first and then a long list of warnings. `grep -q` exits as
+  # soon as it matches, printf then dies with SIGPIPE on the still-unwritten
+  # output, pipefail makes the pipeline fail, and a correctly signed AAB
+  # is reported as failed. A plain [[ ]] match has no pipe and no race.
   JARSIGNER_OUT="$(jarsigner -verify "$AAB_SIGNED_FINAL" 2>&1)"
   echo "$JARSIGNER_OUT"
-  if ! printf '%s' "$JARSIGNER_OUT" | grep -q "jar verified"; then
+  if [[ "$JARSIGNER_OUT" != *"jar verified"* ]]; then
     echo "Error: AAB signature verification failed." >&2
     exit 1
   fi
