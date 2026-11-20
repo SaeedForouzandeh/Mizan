@@ -1,0 +1,6 @@
+{
+  "name": "میزان — دفتر زنده موجودی و سود",
+  "description": "دفتر زنده مدیریت موجودی انبار، محاسبه بهای تمام‌شده FIFO، ثبت فروش، تحلیل سود و مدیریت مخاطبین برای کافه‌ها و فروشگاه‌ها.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,352 @@
+{
+  "entities": {
+    "StoreProfile": {
+      "title": "StoreProfile",
+      "description": "Authenticated store owner profile and workspace preferences.",
+      "type": "object",
+      "properties": {
+        "ownerId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "storeName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "businessType": {
+          "type": "string",
+          "enum": ["cafe", "restaurant", "shop", "boutique", "online", "other"]
+        },
+        "email": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 160
+        },
+        "currency": {
+          "type": "string",
+          "enum": ["toman", "rial"]
+        },
+        "theme": {
+          "type": "string",
+          "enum": ["light", "dark"]
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["ownerId", "storeName", "businessType", "email", "currency", "theme", "createdAt", "updatedAt"]
+    },
+    "Product": {
+      "title": "Product",
+      "description": "An inventory item managed in the store ledger.",
+      "type": "object",
+      "properties": {
+        "ownerId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "sku": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 48
+        },
+        "category": {
+          "type": "string",
+          "maxLength": 60
+        },
+        "unit": {
+          "type": "string",
+          "enum": ["عدد", "کیلو", "گرم", "لیتر", "میلی‌لیتر", "جعبه", "بسته"]
+        },
+        "sellPrice": {
+          "type": "number"
+        },
+        "reorderLevel": {
+          "type": "number"
+        },
+        "notes": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["ownerId", "name", "sku", "category", "unit", "sellPrice", "reorderLevel", "notes", "createdAt", "updatedAt"]
+    },
+    "PurchaseBatch": {
+      "title": "PurchaseBatch",
+      "description": "FIFO stock batch representing initial stock, restock, or positive adjustment.",
+      "type": "object",
+      "properties": {
+        "ownerId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "productId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "initialQty": {
+          "type": "number"
+        },
+        "remainingQty": {
+          "type": "number"
+        },
+        "unitCost": {
+          "type": "number"
+        },
+        "source": {
+          "type": "string",
+          "enum": ["initial", "restock", "adjustment"]
+        },
+        "supplierName": {
+          "type": "string",
+          "maxLength": 120
+        },
+        "note": {
+          "type": "string",
+          "maxLength": 300
+        },
+        "purchasedAt": {
+          "type": "number"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["ownerId", "productId", "initialQty", "remainingQty", "unitCost", "source", "supplierName", "note", "purchasedAt", "createdAt", "updatedAt"]
+    },
+    "Sale": {
+      "title": "Sale",
+      "description": "Completed or voided sale transaction with FIFO cost breakdown.",
+      "type": "object",
+      "properties": {
+        "ownerId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "productId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "productName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "unit": {
+          "type": "string",
+          "enum": ["عدد", "کیلو", "گرم", "لیتر", "میلی‌لیتر", "جعبه", "بسته"]
+        },
+        "quantity": {
+          "type": "number"
+        },
+        "unitPrice": {
+          "type": "number"
+        },
+        "revenue": {
+          "type": "number"
+        },
+        "cogs": {
+          "type": "number"
+        },
+        "profit": {
+          "type": "number"
+        },
+        "marginPercent": {
+          "type": "number"
+        },
+        "channel": {
+          "type": "string",
+          "enum": ["حضوری", "اینستاگرام", "عمده", "آنلاین", "سایر"]
+        },
+        "customerId": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "customerName": {
+          "type": "string",
+          "maxLength": 120
+        },
+        "status": {
+          "type": "string",
+          "enum": ["completed", "voided"]
+        },
+        "soldAt": {
+          "type": "number"
+        },
+        "consumedBatches": {
+          "type": "array"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "ownerId",
+        "productId",
+        "productName",
+        "unit",
+        "quantity",
+        "unitPrice",
+        "revenue",
+        "cogs",
+        "profit",
+        "marginPercent",
+        "channel",
+        "customerId",
+        "customerName",
+        "status",
+        "soldAt",
+        "consumedBatches",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Contact": {
+      "title": "Contact",
+      "description": "Customer or supplier contact owned by the store.",
+      "type": "object",
+      "properties": {
+        "ownerId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["customer", "supplier"]
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "handle": {
+          "type": "string",
+          "maxLength": 80
+        },
+        "phone": {
+          "type": "string",
+          "maxLength": 32
+        },
+        "notes": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["ownerId", "type", "name", "handle", "phone", "notes", "createdAt", "updatedAt"]
+    },
+    "StockAdjustment": {
+      "title": "StockAdjustment",
+      "description": "Audit log entry recorded when product stock is manually adjusted.",
+      "type": "object",
+      "properties": {
+        "ownerId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "productId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "delta": {
+          "type": "number"
+        },
+        "unitCost": {
+          "type": "number"
+        },
+        "reason": {
+          "type": "string",
+          "maxLength": 300
+        },
+        "adjustedAt": {
+          "type": "number"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["ownerId", "productId", "delta", "unitCost", "reason", "adjustedAt", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/StoreProfile" },
+      "description": "Private store owner profile and preferences (PII isolated to owner)."
+    },
+    "/users/{userId}/products/{productId}": {
+      "schema": { "$ref": "#/entities/Product" },
+      "description": "Products owned by a specific store."
+    },
+    "/users/{userId}/batches/{batchId}": {
+      "schema": { "$ref": "#/entities/PurchaseBatch" },
+      "description": "FIFO purchase batches referencing products owned by a store."
+    },
+    "/users/{userId}/sales/{saleId}": {
+      "schema": { "$ref": "#/entities/Sale" },
+      "description": "Sale records with FIFO cost breakdown owned by a store."
+    },
+    "/users/{userId}/contacts/{contactId}": {
+      "schema": { "$ref": "#/entities/Contact" },
+      "description": "Customers and suppliers owned by a store (PII isolated to owner)."
+    },
+    "/users/{userId}/adjustments/{adjustmentId}": {
+      "schema": { "$ref": "#/entities/StockAdjustment" },
+      "description": "Manual stock adjustment audit entries owned by a store."
+    }
+  }
+}

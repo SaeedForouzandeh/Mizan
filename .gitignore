@@ -1,0 +1,25 @@
+# Dependencies & builds
+node_modules/
+build/
+dist/
+dev-dist/
+coverage/
+
+# Environment & secrets
+.env*
+!.env.example
+
+# Android signing keys & local artifacts (never commit private keystores!)
+*.jks
+*.keystore
+keystore.properties
+*.apk
+*.aab
+android/
+ios/
+release-artifacts/
+
+# Tooling & OS
+.playwright-cli/
+.DS_Store
+*.log

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Production Android Network Security Configuration for Mizan.
+  - Disables all insecure HTTP cleartext traffic (cleartextTrafficPermitted="false").
+  - Trusts only system certificate authorities (blocks MITM user CAs in release builds).
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

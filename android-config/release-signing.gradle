@@ -1,0 +1,58 @@
+// Production Release Signing & Hardening Configuration for Mizan
+// Automatically applied to android/app/build.gradle by scripts/harden-android.mjs
+
+def mizanKeystorePropsFile = rootProject.file("../keystore.properties")
+def mizanKeystoreProps = new Properties()
+if (mizanKeystorePropsFile.exists()) {
+    mizanKeystorePropsFile.withInputStream { stream ->
+        mizanKeystoreProps.load(stream)
+    }
+}
+
+def resolveSigningProp = { String propKey, String envKey ->
+    def envVal = System.getenv(envKey)
+    if (envVal != null && !envVal.trim().isEmpty()) {
+        return envVal.trim()
+    }
+    def propVal = mizanKeystoreProps.getProperty(propKey)
+    return propVal != null ? propVal.trim() : ""
+}
+
+def releaseStorePath = resolveSigningProp("storeFile", "ANDROID_KEYSTORE_PATH")
+def releaseStorePassword = resolveSigningProp("storePassword", "ANDROID_KEYSTORE_PASSWORD")
+def releaseKeyAlias = resolveSigningProp("keyAlias", "ANDROID_KEY_ALIAS")
+def releaseKeyPassword = resolveSigningProp("keyPassword", "ANDROID_KEY_PASSWORD")
+
+android {
+    signingConfigs {
+        release {
+            if (releaseStorePath) {
+                def resolvedFile = file(releaseStorePath)
+                if (!resolvedFile.exists()) {
+                    resolvedFile = rootProject.file("../" + releaseStorePath)
+                }
+                storeFile resolvedFile
+                storePassword releaseStorePassword
+                keyAlias releaseKeyAlias
+                keyPassword releaseKeyPassword
+                enableV1Signing = true
+                enableV2Signing = true
+                enableV3Signing = true
+                enableV4Signing = true
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            debuggable false
+            jniDebuggable false
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            if (releaseStorePath) {
+                signingConfig signingConfigs.release
+            }
+        }
+    }
+}

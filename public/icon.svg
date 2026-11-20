@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <defs>
+    <linearGradient id="mizanBg" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#C87D28" />
+      <stop offset="100%" stop-color="#7F4A0E" />
+    </linearGradient>
+    <linearGradient id="mizanSheen" x1="256" y1="0" x2="256" y2="256" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.22" />
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0" />
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="118" fill="url(#mizanBg)" />
+  <rect width="512" height="256" rx="118" fill="url(#mizanSheen)" />
+  <g stroke="#FAF6F0" stroke-width="24" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M256 116V372" />
+    <path d="M188 372H324" />
+    <path d="M138 176L256 144L374 176" />
+    <path d="M138 176L104 268C104 294 128 312 154 312C180 312 204 294 204 268L170 176" />
+    <path d="M374 176L340 268C340 294 364 312 390 312C416 312 440 294 440 268L406 176" />
+  </g>
+  <circle cx="256" cy="144" r="18" fill="#FAF6F0" />
+</svg>

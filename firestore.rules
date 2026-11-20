@@ -1,0 +1,366 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global Safety Net: Default deny all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Primitive Helpers ---
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerified() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isVerifiedOwner(userId) {
+      return isVerified() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function hasStoreProfile(userId) {
+      return exists(/databases/$(database)/documents/users/$(userId));
+    }
+
+    function hasProduct(userId, productId) {
+      return isValidId(productId) &&
+        exists(/databases/$(database)/documents/users/$(userId)/products/$(productId));
+    }
+
+    // --- Validation Blueprints ---
+    function isValidStoreProfile(data, userId) {
+      return data.keys().hasAll([
+          'ownerId', 'storeName', 'businessType', 'email',
+          'currency', 'theme', 'createdAt', 'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'ownerId', 'storeName', 'businessType', 'email',
+          'currency', 'theme', 'createdAt', 'updatedAt'
+        ])
+        && isValidId(data.ownerId)
+        && data.ownerId == userId
+        && data.ownerId == request.auth.uid
+        && data.storeName is string && data.storeName.size() >= 1 && data.storeName.size() <= 80
+        && data.businessType in ['cafe', 'restaurant', 'shop', 'boutique', 'online', 'other']
+        && data.email is string && data.email.size() >= 3 && data.email.size() <= 160
+        && data.currency in ['toman', 'rial']
+        && data.theme in ['light', 'dark']
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidProduct(data, userId) {
+      return data.keys().hasAll([
+          'ownerId', 'name', 'sku', 'category', 'unit',
+          'sellPrice', 'reorderLevel', 'notes', 'createdAt', 'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'ownerId', 'name', 'sku', 'category', 'unit',
+          'sellPrice', 'reorderLevel', 'notes', 'createdAt', 'updatedAt'
+        ])
+        && isValidId(data.ownerId)
+        && data.ownerId == userId
+        && data.ownerId == request.auth.uid
+        && data.name is string && data.name.size() >= 1 && data.name.size() <= 120
+        && data.sku is string && data.sku.size() >= 1 && data.sku.size() <= 48
+        && data.category is string && data.category.size() <= 60
+        && data.unit in ['عدد', 'کیلو', 'گرم', 'لیتر', 'میلی‌لیتر', 'جعبه', 'بسته']
+        && data.sellPrice is number && data.sellPrice >= 0 && data.sellPrice <= 100000000000
+        && data.reorderLevel is number && data.reorderLevel >= 0 && data.reorderLevel <= 100000000
+        && data.notes is string && data.notes.size() <= 500
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidBatch(data, userId) {
+      return data.keys().hasAll([
+          'ownerId', 'productId', 'initialQty', 'remainingQty',
+          'unitCost', 'source', 'supplierName', 'note',
+          'purchasedAt', 'createdAt', 'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'ownerId', 'productId', 'initialQty', 'remainingQty',
+          'unitCost', 'source', 'supplierName', 'note',
+          'purchasedAt', 'createdAt', 'updatedAt'
+        ])
+        && isValidId(data.ownerId)
+        && data.ownerId == userId
+        && data.ownerId == request.auth.uid
+        && isValidId(data.productId)
+        && data.initialQty is number && data.initialQty > 0 && data.initialQty <= 100000000
+        && data.remainingQty is number && data.remainingQty >= 0 && data.remainingQty <= data.initialQty
+        && data.unitCost is number && data.unitCost >= 0 && data.unitCost <= 100000000000
+        && data.source in ['initial', 'restock', 'adjustment']
+        && data.supplierName is string && data.supplierName.size() <= 120
+        && data.note is string && data.note.size() <= 300
+        && data.purchasedAt is number && data.purchasedAt > 0
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidConsumedBatches(listVal) {
+      return listVal is list
+        && listVal.size() >= 1
+        && listVal.size() <= 25
+        && listVal[0] is map
+        && listVal[0].keys().hasAll(['batchId', 'qty', 'unitCost'])
+        && listVal[0].keys().hasOnly(['batchId', 'qty', 'unitCost'])
+        && isValidId(listVal[0].batchId)
+        && listVal[0].qty is number && listVal[0].qty > 0
+        && listVal[0].unitCost is number && listVal[0].unitCost >= 0;
+    }
+
+    function isValidSale(data, userId) {
+      return data.keys().hasAll([
+          'ownerId', 'productId', 'productName', 'unit', 'quantity',
+          'unitPrice', 'revenue', 'cogs', 'profit', 'marginPercent',
+          'channel', 'customerId', 'customerName', 'status', 'soldAt',
+          'consumedBatches', 'createdAt', 'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'ownerId', 'productId', 'productName', 'unit', 'quantity',
+          'unitPrice', 'revenue', 'cogs', 'profit', 'marginPercent',
+          'channel', 'customerId', 'customerName', 'status', 'soldAt',
+          'consumedBatches', 'createdAt', 'updatedAt'
+        ])
+        && isValidId(data.ownerId)
+        && data.ownerId == userId
+        && data.ownerId == request.auth.uid
+        && isValidId(data.productId)
+        && data.productName is string && data.productName.size() >= 1 && data.productName.size() <= 120
+        && data.unit in ['عدد', 'کیلو', 'گرم', 'لیتر', 'میلی‌لیتر', 'جعبه', 'بسته']
+        && data.quantity is number && data.quantity > 0 && data.quantity <= 100000000
+        && data.unitPrice is number && data.unitPrice >= 0 && data.unitPrice <= 100000000000
+        && data.revenue is number && data.revenue >= 0
+        && data.cogs is number && data.cogs >= 0
+        && data.profit is number
+        && data.marginPercent is number && data.marginPercent >= -1000 && data.marginPercent <= 100
+        && data.channel in ['حضوری', 'اینستاگرام', 'عمده', 'آنلاین', 'سایر']
+        && data.customerId is string && data.customerId.size() <= 128
+        && data.customerName is string && data.customerName.size() <= 120
+        && data.status in ['completed', 'voided']
+        && data.soldAt is number && data.soldAt > 0
+        && isValidConsumedBatches(data.consumedBatches)
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidContact(data, userId) {
+      return data.keys().hasAll([
+          'ownerId', 'type', 'name', 'handle', 'phone', 'notes', 'createdAt', 'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'ownerId', 'type', 'name', 'handle', 'phone', 'notes', 'createdAt', 'updatedAt'
+        ])
+        && isValidId(data.ownerId)
+        && data.ownerId == userId
+        && data.ownerId == request.auth.uid
+        && data.type in ['customer', 'supplier']
+        && data.name is string && data.name.size() >= 1 && data.name.size() <= 120
+        && data.handle is string && data.handle.size() <= 80
+        && data.phone is string && data.phone.size() <= 32
+        && data.notes is string && data.notes.size() <= 500
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidAdjustment(data, userId) {
+      return data.keys().hasAll([
+          'ownerId', 'productId', 'delta', 'unitCost', 'reason', 'adjustedAt', 'createdAt'
+        ])
+        && data.keys().hasOnly([
+          'ownerId', 'productId', 'delta', 'unitCost', 'reason', 'adjustedAt', 'createdAt'
+        ])
+        && isValidId(data.ownerId)
+        && data.ownerId == userId
+        && data.ownerId == request.auth.uid
+        && isValidId(data.productId)
+        && data.delta is number && data.delta != 0
+        && data.unitCost is number && data.unitCost >= 0
+        && data.reason is string && data.reason.size() <= 300
+        && data.adjustedAt is number && data.adjustedAt > 0
+        && data.createdAt is timestamp;
+    }
+
+    // --- Collection: Store Profile (PII isolated strictly to owner) ---
+    match /users/{userId} {
+      allow get: if isOwner(userId) && isValidId(userId);
+      allow list: if false;
+
+      allow create: if isVerifiedOwner(userId)
+        && isValidId(userId)
+        && isValidStoreProfile(incoming(), userId)
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+
+      allow update: if isVerifiedOwner(userId)
+        && isValidId(userId)
+        && isValidStoreProfile(incoming(), userId)
+        && incoming().ownerId == existing().ownerId
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && (
+          incoming().diff(existing()).affectedKeys().hasOnly(['storeName', 'businessType', 'updatedAt']) ||
+          incoming().diff(existing()).affectedKeys().hasOnly(['currency', 'updatedAt']) ||
+          incoming().diff(existing()).affectedKeys().hasOnly(['theme', 'updatedAt']) ||
+          incoming().diff(existing()).affectedKeys().hasOnly(['storeName', 'businessType', 'currency', 'theme', 'updatedAt'])
+        );
+
+      allow delete: if false;
+
+      // --- Subcollection: Products ---
+      match /products/{productId} {
+        allow get: if isOwner(userId) && isValidId(userId) && isValidId(productId);
+        allow list: if isOwner(userId) && resource.data.ownerId == request.auth.uid;
+
+        allow create: if isVerifiedOwner(userId)
+          && isValidId(userId)
+          && isValidId(productId)
+          && isValidProduct(incoming(), userId)
+          && incoming().createdAt == request.time
+          && incoming().updatedAt == request.time
+          && hasStoreProfile(userId);
+
+        allow update: if isVerifiedOwner(userId)
+          && isValidId(userId)
+          && isValidId(productId)
+          && isValidProduct(incoming(), userId)
+          && incoming().ownerId == existing().ownerId
+          && incoming().createdAt == existing().createdAt
+          && incoming().updatedAt == request.time
+          && incoming().diff(existing()).affectedKeys().hasOnly([
+            'name', 'sku', 'category', 'unit', 'sellPrice', 'reorderLevel', 'notes', 'updatedAt'
+          ]);
+
+        allow delete: if isVerifiedOwner(userId) && isValidId(userId) && isValidId(productId);
+      }
+
+      // --- Subcollection: Purchase Batches (FIFO) ---
+      match /batches/{batchId} {
+        allow get: if isOwner(userId) && isValidId(userId) && isValidId(batchId);
+        allow list: if isOwner(userId) && resource.data.ownerId == request.auth.uid;
+
+        allow create: if isVerifiedOwner(userId)
+          && isValidId(userId)
+          && isValidId(batchId)
+          && isValidBatch(incoming(), userId)
+          && incoming().createdAt == request.time
+          && incoming().updatedAt == request.time
+          && hasStoreProfile(userId)
+          && (
+            hasProduct(userId, incoming().productId) ||
+            existsAfter(/databases/$(database)/documents/users/$(userId)/products/$(incoming().productId))
+          );
+
+        allow update: if isVerifiedOwner(userId)
+          && isValidId(userId)
+          && isValidId(batchId)
+          && isValidBatch(incoming(), userId)
+          && incoming().ownerId == existing().ownerId
+          && incoming().productId == existing().productId
+          && incoming().initialQty == existing().initialQty
+          && incoming().unitCost == existing().unitCost
+          && incoming().source == existing().source
+          && incoming().purchasedAt == existing().purchasedAt
+          && incoming().createdAt == existing().createdAt
+          && incoming().updatedAt == request.time
+          && incoming().diff(existing()).affectedKeys().hasOnly(['remainingQty', 'updatedAt']);
+
+        allow delete: if isVerifiedOwner(userId) && isValidId(userId) && isValidId(batchId);
+      }
+
+      // --- Subcollection: Sales ---
+      match /sales/{saleId} {
+        allow get: if isOwner(userId) && isValidId(userId) && isValidId(saleId);
+        allow list: if isOwner(userId) && resource.data.ownerId == request.auth.uid;
+
+        allow create: if isVerifiedOwner(userId)
+          && isValidId(userId)
+          && isValidId(saleId)
+          && isValidSale(incoming(), userId)
+          && incoming().status == 'completed'
+          && incoming().createdAt == request.time
+          && incoming().updatedAt == request.time
+          && hasStoreProfile(userId)
+          && hasProduct(userId, incoming().productId);
+
+        // Terminal State Locking: only completed -> voided transition is permitted
+        allow update: if isVerifiedOwner(userId)
+          && isValidId(userId)
+          && isValidId(saleId)
+          && isValidSale(incoming(), userId)
+          && existing().status == 'completed'
+          && incoming().status == 'voided'
+          && incoming().ownerId == existing().ownerId
+          && incoming().productId == existing().productId
+          && incoming().createdAt == existing().createdAt
+          && incoming().updatedAt == request.time
+          && incoming().diff(existing()).affectedKeys().hasOnly(['status', 'updatedAt']);
+
+        allow delete: if false;
+      }
+
+      // --- Subcollection: Contacts (Customers & Suppliers, PII isolated to owner) ---
+      match /contacts/{contactId} {
+        allow get: if isOwner(userId) && isValidId(userId) && isValidId(contactId);
+        allow list: if isOwner(userId) && resource.data.ownerId == request.auth.uid;
+
+        allow create: if isVerifiedOwner(userId)
+          && isValidId(userId)
+          && isValidId(contactId)
+          && isValidContact(incoming(), userId)
+          && incoming().createdAt == request.time
+          && incoming().updatedAt == request.time
+          && hasStoreProfile(userId);
+
+        allow update: if isVerifiedOwner(userId)
+          && isValidId(userId)
+          && isValidId(contactId)
+          && isValidContact(incoming(), userId)
+          && incoming().ownerId == existing().ownerId
+          && incoming().createdAt == existing().createdAt
+          && incoming().updatedAt == request.time
+          && incoming().diff(existing()).affectedKeys().hasOnly([
+            'type', 'name', 'handle', 'phone', 'notes', 'updatedAt'
+          ]);
+
+        allow delete: if isVerifiedOwner(userId) && isValidId(userId) && isValidId(contactId);
+      }
+
+      // --- Subcollection: Stock Adjustments (Append-Only Audit Log) ---
+      match /adjustments/{adjustmentId} {
+        allow get: if isOwner(userId) && isValidId(userId) && isValidId(adjustmentId);
+        allow list: if isOwner(userId) && resource.data.ownerId == request.auth.uid;
+
+        allow create: if isVerifiedOwner(userId)
+          && isValidId(userId)
+          && isValidId(adjustmentId)
+          && isValidAdjustment(incoming(), userId)
+          && incoming().createdAt == request.time
+          && hasStoreProfile(userId)
+          && hasProduct(userId, incoming().productId);
+
+        allow update: if false;
+        allow delete: if false;
+      }
+    }
+  }
+}

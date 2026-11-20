@@ -1,0 +1,424 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  :root {
+    --font-sans: 'Vazirmatn', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    --mizan-bg: #FAF6F0;
+    --mizan-surface: rgba(255, 252, 247, 0.74);
+    --mizan-surface-strong: rgba(255, 253, 250, 0.88);
+    --mizan-border: rgba(154, 91, 19, 0.13);
+    --mizan-shadow: 0 10px 30px -12px rgba(120, 72, 22, 0.12), 0 2px 6px -1px rgba(120, 72, 22, 0.05);
+  }
+
+  .dark {
+    --mizan-bg: #14110E;
+    --mizan-surface: rgba(31, 25, 20, 0.74);
+    --mizan-surface-strong: rgba(38, 31, 25, 0.90);
+    --mizan-border: rgba(217, 138, 43, 0.16);
+    --mizan-shadow: 0 12px 32px -12px rgba(0, 0, 0, 0.55), 0 2px 8px -1px rgba(0, 0, 0, 0.35);
+  }
+
+  html {
+    font-family: var(--font-sans);
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--mizan-bg);
+    overflow-x: hidden;
+  }
+}
+
+.mizan-glass {
+  background-color: var(--mizan-surface);
+  backdrop-filter: blur(24px) saturate(185%);
+  -webkit-backdrop-filter: blur(24px) saturate(185%);
+  border: 1px solid var(--mizan-border);
+  box-shadow:
+    var(--mizan-shadow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.72);
+}
+
+.dark .mizan-glass {
+  box-shadow:
+    var(--mizan-shadow),
+    inset 0 1px 0 rgba(255, 236, 206, 0.10);
+}
+
+/* Interactive Floating Inventory Card with iOS / Telegram Haptic-Like Press */
+.mizan-glass-card {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 254, 251, 0.80) 0%,
+    rgba(252, 246, 237, 0.64) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.82);
+  box-shadow:
+    0 18px 38px -14px rgba(96, 56, 16, 0.22),
+    0 6px 16px -6px rgba(96, 56, 16, 0.11),
+    0 0 0 0.5px rgba(154, 91, 19, 0.11),
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.94),
+    inset 0 -1px 0 rgba(154, 91, 19, 0.06);
+  transform: translate3d(0, 0, 0) scale(1);
+  transition:
+    transform 240ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 240ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 200ms ease;
+  will-change: transform, box-shadow;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.dark .mizan-glass-card {
+  background: linear-gradient(
+    180deg,
+    rgba(44, 35, 28, 0.78) 0%,
+    rgba(25, 19, 15, 0.68) 100%
+  );
+  border: 1px solid rgba(255, 224, 184, 0.16);
+  box-shadow:
+    0 20px 44px -14px rgba(0, 0, 0, 0.78),
+    0 7px 18px -6px rgba(0, 0, 0, 0.52),
+    0 0 0 0.5px rgba(255, 210, 150, 0.08),
+    inset 0 1.5px 0 rgba(255, 236, 206, 0.16),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.45);
+}
+
+@media (hover: hover) {
+  .mizan-glass-card:hover {
+    transform: translate3d(0, -3px, 0) scale(1.006);
+    border-color: rgba(255, 255, 255, 0.95);
+    box-shadow:
+      0 24px 48px -14px rgba(96, 56, 16, 0.28),
+      0 10px 22px -8px rgba(96, 56, 16, 0.14),
+      0 0 0 0.5px rgba(154, 91, 19, 0.18),
+      inset 0 1.5px 0 rgba(255, 255, 255, 1);
+  }
+
+  .dark .mizan-glass-card:hover {
+    border-color: rgba(255, 224, 184, 0.26);
+    box-shadow:
+      0 26px 52px -12px rgba(0, 0, 0, 0.86),
+      0 10px 24px -6px rgba(0, 0, 0, 0.60),
+      inset 0 1.5px 0 rgba(255, 236, 206, 0.22);
+  }
+}
+
+/* Tactile haptic-like compression when pressing the main card surface */
+.mizan-glass-card:has(> button[data-card-main]:active),
+.mizan-glass-card.is-pressed {
+  transform: translate3d(0, 1.5px, 0) scale(0.968);
+  transition-duration: 95ms;
+  box-shadow:
+    0 6px 14px -6px rgba(96, 56, 16, 0.22),
+    0 2px 6px -2px rgba(96, 56, 16, 0.12),
+    0 0 0 0.5px rgba(154, 91, 19, 0.20),
+    inset 0 1px 2px rgba(154, 91, 19, 0.08);
+}
+
+.dark .mizan-glass-card:has(> button[data-card-main]:active),
+.dark .mizan-glass-card.is-pressed {
+  box-shadow:
+    0 8px 18px -6px rgba(0, 0, 0, 0.78),
+    0 2px 6px -2px rgba(0, 0, 0, 0.58),
+    inset 0 1px 0 rgba(255, 236, 206, 0.12);
+}
+
+.mizan-glass-strong {
+  background-color: var(--mizan-surface-strong);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  border: 1px solid var(--mizan-border);
+  box-shadow: var(--mizan-shadow);
+}
+
+/* Deep iOS / Telegram Liquid-Glass Floating Surface (Top Bar, Desktop Sidebar, Toast) */
+.mizan-float-glass {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 254, 251, 0.78) 0%,
+    rgba(253, 248, 240, 0.64) 100%
+  );
+  backdrop-filter: blur(34px) saturate(210%);
+  -webkit-backdrop-filter: blur(34px) saturate(210%);
+  border: 1px solid rgba(255, 255, 255, 0.82);
+  box-shadow:
+    0 18px 42px -12px rgba(96, 56, 16, 0.22),
+    0 6px 16px -6px rgba(96, 56, 16, 0.12),
+    0 1px 2px rgba(96, 56, 16, 0.06),
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.92),
+    inset 0 -1px 0 rgba(154, 91, 19, 0.08);
+}
+
+.dark .mizan-float-glass {
+  background: linear-gradient(
+    180deg,
+    rgba(46, 36, 28, 0.76) 0%,
+    rgba(25, 19, 15, 0.66) 100%
+  );
+  border: 1px solid rgba(255, 224, 184, 0.18);
+  box-shadow:
+    0 20px 48px -10px rgba(0, 0, 0, 0.75),
+    0 8px 18px -6px rgba(0, 0, 0, 0.52),
+    inset 0 1.5px 0 rgba(255, 236, 206, 0.18),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.45);
+}
+
+/* Dedicated Deep Floating Bottom Navigation Dock (iOS / Telegram style) */
+.mizan-bottom-nav {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 254, 251, 0.74) 0%,
+    rgba(250, 244, 234, 0.60) 100%
+  );
+  backdrop-filter: blur(40px) saturate(220%);
+  -webkit-backdrop-filter: blur(40px) saturate(220%);
+  border: 1px solid rgba(255, 255, 255, 0.86);
+  box-shadow:
+    0 24px 52px -10px rgba(84, 48, 12, 0.28),
+    0 10px 22px -6px rgba(84, 48, 12, 0.15),
+    0 0 0 0.5px rgba(154, 91, 19, 0.14),
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.96),
+    inset 0 -1px 0 rgba(154, 91, 19, 0.10);
+}
+
+.dark .mizan-bottom-nav {
+  background: linear-gradient(
+    180deg,
+    rgba(50, 39, 30, 0.74) 0%,
+    rgba(24, 18, 14, 0.64) 100%
+  );
+  border: 1px solid rgba(255, 224, 184, 0.20);
+  box-shadow:
+    0 26px 56px -8px rgba(0, 0, 0, 0.82),
+    0 10px 24px -6px rgba(0, 0, 0, 0.58),
+    0 0 0 0.5px rgba(255, 210, 150, 0.10),
+    inset 0 1.5px 0 rgba(255, 236, 206, 0.22),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.55);
+}
+
+/* Active Capsule Pill inside Floating Bottom Nav */
+.mizan-nav-pill-active {
+  background: linear-gradient(
+    180deg,
+    rgba(182, 110, 27, 0.20) 0%,
+    rgba(154, 91, 19, 0.12) 100%
+  );
+  border: 1px solid rgba(154, 91, 19, 0.22);
+  box-shadow:
+    0 6px 14px -6px rgba(154, 91, 19, 0.30),
+    inset 0 1px 0 rgba(255, 255, 255, 0.75);
+}
+
+.dark .mizan-nav-pill-active {
+  background: linear-gradient(
+    180deg,
+    rgba(245, 178, 86, 0.24) 0%,
+    rgba(217, 138, 43, 0.14) 100%
+  );
+  border: 1px solid rgba(251, 191, 36, 0.26);
+  box-shadow:
+    0 8px 18px -6px rgba(0, 0, 0, 0.65),
+    inset 0 1px 0 rgba(255, 236, 206, 0.24);
+}
+
+/* Primary Floating Glass CTA Button */
+.mizan-btn-primary {
+  background: linear-gradient(
+    180deg,
+    rgba(184, 112, 28, 0.96) 0%,
+    rgba(146, 83, 14, 0.98) 100%
+  );
+  backdrop-filter: blur(18px) saturate(170%);
+  -webkit-backdrop-filter: blur(18px) saturate(170%);
+  color: #ffffff;
+  border: 1px solid rgba(255, 236, 204, 0.34);
+  box-shadow:
+    0 14px 28px -8px rgba(138, 79, 14, 0.50),
+    0 4px 10px -3px rgba(120, 66, 10, 0.30),
+    inset 0 1.5px 0 rgba(255, 245, 228, 0.44),
+    inset 0 -1px 0 rgba(90, 48, 6, 0.35);
+  transition: transform 160ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 160ms cubic-bezier(0.16, 1, 0.3, 1),
+    filter 160ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.mizan-btn-primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  filter: brightness(1.04);
+  box-shadow:
+    0 18px 34px -8px rgba(138, 79, 14, 0.56),
+    0 6px 14px -4px rgba(120, 66, 10, 0.34),
+    inset 0 1.5px 0 rgba(255, 245, 228, 0.52),
+    inset 0 -1px 0 rgba(90, 48, 6, 0.35);
+}
+
+.mizan-btn-primary:active:not(:disabled) {
+  transform: scale(0.97);
+  box-shadow:
+    0 6px 14px -4px rgba(138, 79, 14, 0.42),
+    inset 0 1px 0 rgba(255, 245, 228, 0.30);
+}
+
+.dark .mizan-btn-primary {
+  background: linear-gradient(
+    180deg,
+    rgba(196, 122, 34, 0.94) 0%,
+    rgba(148, 84, 15, 0.96) 100%
+  );
+  border: 1px solid rgba(255, 224, 174, 0.30);
+  box-shadow:
+    0 16px 32px -8px rgba(0, 0, 0, 0.75),
+    0 6px 16px -4px rgba(180, 108, 24, 0.36),
+    inset 0 1.5px 0 rgba(255, 240, 214, 0.38),
+    inset 0 -1px 0 rgba(70, 36, 4, 0.50);
+}
+
+/* Secondary Floating Translucent Glass Button */
+.mizan-btn-glass {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 254, 251, 0.82) 0%,
+    rgba(252, 246, 236, 0.66) 100%
+  );
+  backdrop-filter: blur(24px) saturate(190%);
+  -webkit-backdrop-filter: blur(24px) saturate(190%);
+  border: 1px solid rgba(255, 255, 255, 0.84);
+  box-shadow:
+    0 12px 26px -10px rgba(96, 56, 16, 0.20),
+    0 3px 8px -2px rgba(96, 56, 16, 0.09),
+    0 0 0 0.5px rgba(154, 91, 19, 0.12),
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.94);
+  transition: transform 160ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 160ms cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 160ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.mizan-btn-glass:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow:
+    0 16px 32px -10px rgba(96, 56, 16, 0.25),
+    0 5px 12px -3px rgba(96, 56, 16, 0.12),
+    0 0 0 0.5px rgba(154, 91, 19, 0.18),
+    inset 0 1.5px 0 rgba(255, 255, 255, 1);
+}
+
+.mizan-btn-glass:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.dark .mizan-btn-glass {
+  background: linear-gradient(
+    180deg,
+    rgba(52, 41, 32, 0.78) 0%,
+    rgba(30, 23, 18, 0.68) 100%
+  );
+  border: 1px solid rgba(255, 224, 184, 0.18);
+  box-shadow:
+    0 14px 30px -10px rgba(0, 0, 0, 0.72),
+    0 4px 10px -3px rgba(0, 0, 0, 0.48),
+    inset 0 1.5px 0 rgba(255, 236, 206, 0.18);
+}
+
+.dark .mizan-btn-glass:hover:not(:disabled) {
+  border-color: rgba(255, 224, 184, 0.28);
+  box-shadow:
+    0 18px 36px -10px rgba(0, 0, 0, 0.80),
+    0 6px 14px -4px rgba(0, 0, 0, 0.55),
+    inset 0 1.5px 0 rgba(255, 236, 206, 0.24);
+}
+
+/* Floating Circular Action Button (Inventory FAB) */
+.mizan-fab {
+  background: linear-gradient(
+    160deg,
+    rgba(218, 140, 44, 0.96) 0%,
+    rgba(148, 84, 15, 0.98) 100%
+  );
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 240, 214, 0.48);
+  box-shadow:
+    0 18px 34px -6px rgba(138, 79, 14, 0.58),
+    0 6px 14px -4px rgba(96, 54, 10, 0.36),
+    inset 0 2px 0 rgba(255, 248, 234, 0.55),
+    inset 0 -2px 4px rgba(90, 48, 6, 0.35);
+  transition: transform 160ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 160ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.mizan-fab:hover {
+  transform: translateY(-2px);
+}
+
+.mizan-fab:active {
+  transform: scale(0.93);
+}
+
+.dark .mizan-fab {
+  border-color: rgba(255, 224, 174, 0.38);
+  box-shadow:
+    0 18px 38px -6px rgba(0, 0, 0, 0.82),
+    0 8px 20px -4px rgba(202, 124, 30, 0.42),
+    inset 0 2px 0 rgba(255, 242, 218, 0.42);
+}
+
+/* Segmented Control Floating Glass Track */
+.mizan-segmented-glass {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 253, 249, 0.72) 0%,
+    rgba(249, 242, 231, 0.58) 100%
+  );
+  backdrop-filter: blur(24px) saturate(185%);
+  -webkit-backdrop-filter: blur(24px) saturate(185%);
+  border: 1px solid rgba(255, 255, 255, 0.80);
+  box-shadow:
+    0 10px 24px -10px rgba(96, 56, 16, 0.18),
+    0 2px 6px -2px rgba(96, 56, 16, 0.08),
+    0 0 0 0.5px rgba(154, 91, 19, 0.10),
+    inset 0 1px 0 rgba(255, 255, 255, 0.90);
+}
+
+.dark .mizan-segmented-glass {
+  background: linear-gradient(
+    180deg,
+    rgba(44, 35, 28, 0.72) 0%,
+    rgba(26, 20, 16, 0.64) 100%
+  );
+  border: 1px solid rgba(255, 224, 184, 0.16);
+  box-shadow:
+    0 12px 28px -10px rgba(0, 0, 0, 0.72),
+    inset 0 1px 0 rgba(255, 236, 206, 0.14);
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Custom subtle scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(154, 91, 19, 0.22);
+  border-radius: 9999px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(217, 138, 43, 0.28);
+}
