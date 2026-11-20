@@ -115,12 +115,33 @@ interface LedgerContextValue {
 
 const LedgerContext = createContext<LedgerContextValue | null>(null);
 
+const LEGACY_LOCAL_KEYS = ['mizan_local_ledger_v1', 'mizan_demo_ledger'];
+
+function isLegacyCafeDemoLedger(state: LedgerState): boolean {
+  const ownerId = state.profile.ownerId ?? '';
+  const storeName = (state.profile.storeName ?? '').trim();
+  const authMode = (state.profile as { authMode?: string }).authMode;
+  return (
+    authMode === 'demo' ||
+    ownerId === 'demo-cafe-mizan' ||
+    ownerId.startsWith('demo_') ||
+    storeName.includes('کافه رُستری میزان') ||
+    storeName.includes('کافه رستری میزان') ||
+    storeName === 'کافه میزان'
+  );
+}
+
 function readStoredLedger(): LedgerState | null {
   try {
+    LEGACY_LOCAL_KEYS.forEach((legacyKey) => localStorage.removeItem(legacyKey));
     const raw = localStorage.getItem(LOCAL_LEDGER_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as LedgerState;
     if (!parsed || !parsed.profile || !Array.isArray(parsed.products)) return null;
+    if (isLegacyCafeDemoLedger(parsed)) {
+      localStorage.removeItem(LOCAL_LEDGER_KEY);
+      return null;
+    }
     return parsed;
   } catch {
     return null;

@@ -213,7 +213,7 @@ export function ProductFormModal({ open, onClose, editingProduct }: ProductFormM
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="مثلاً: دانه قهوه برزیل"
+              placeholder="مثلاً: کیف دوشی چرم"
               className="w-full min-h-[44px] px-3.5 rounded-2xl bg-white/80 dark:bg-[#1A1511] border border-amber-900/15 dark:border-amber-200/15 text-sm focus:outline-none focus:ring-2 focus:ring-[#9A5B13]"
             />
           </div>
@@ -229,7 +229,7 @@ export function ProductFormModal({ open, onClose, editingProduct }: ProductFormM
               required
               value={sku}
               onChange={(e) => setSku(e.target.value)}
-              placeholder="COF-105"
+              placeholder="PRD-105"
               className="w-full min-h-[44px] px-3.5 rounded-2xl bg-white/80 dark:bg-[#1A1511] border border-amber-900/15 dark:border-amber-200/15 text-sm text-left tabular-nums focus:outline-none focus:ring-2 focus:ring-[#9A5B13]"
             />
           </div>
@@ -396,7 +396,7 @@ export function ProductFormModal({ open, onClose, editingProduct }: ProductFormM
             rows={2}
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            placeholder="توضیحات نگهداری، نوع آسیاب یا برند..."
+            placeholder="توضیحات، رنگ‌بندی، سایز یا برند..."
             className="w-full px-3.5 py-2.5 rounded-2xl bg-white/80 dark:bg-[#1A1511] border border-amber-900/15 dark:border-amber-200/15 text-sm focus:outline-none focus:ring-2 focus:ring-[#9A5B13]"
           />
         </div>

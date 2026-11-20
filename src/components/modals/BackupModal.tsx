@@ -6,11 +6,11 @@ import { formatJalaliShortDate } from '../../utils/formatters';
 import { ModalFrame } from './ModalFrame';
 
 const BUSINESS_TYPES: BusinessType[] = [
+  'shop',
+  'online',
+  'boutique',
   'cafe',
   'restaurant',
-  'shop',
-  'boutique',
-  'online',
   'other',
 ];
 
@@ -30,7 +30,7 @@ export function BackupModal({ open, onClose }: BackupModalProps) {
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [storeName, setStoreName] = useState('');
-  const [businessType, setBusinessType] = useState<BusinessType>('cafe');
+  const [businessType, setBusinessType] = useState<BusinessType>('online');
   const [pendingJson, setPendingJson] = useState<string | null>(null);
   const [pendingSummary, setPendingSummary] = useState<{
     storeName: string;
