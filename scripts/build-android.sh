@@ -223,7 +223,18 @@ if [ "$MODE" = "aab" ] || [ "$MODE" = "all" ]; then
   fi
   cp "$RAW_AAB" "$AAB_SIGNED_FINAL"
   echo "==> Verifying AAB cryptographic signature..."
-  jarsigner -verify -strict "$AAB_SIGNED_FINAL"
+  # NOTE: do NOT use `jarsigner -verify -strict` here. Android upload keys
+  # are self-signed by design, and -strict turns that into a fatal error
+  # ("PKIX path building failed", exit code 4) even though the AAB is
+  # correctly signed. Plain -verify prints "jar verified" (exit 0) for a
+  # correctly signed bundle, and the grep below still fails the build if
+  # the bundle is unsigned or broken.
+  JARSIGNER_OUT="$(jarsigner -verify "$AAB_SIGNED_FINAL" 2>&1)"
+  echo "$JARSIGNER_OUT"
+  if ! printf '%s' "$JARSIGNER_OUT" | grep -q "jar verified"; then
+    echo "Error: AAB signature verification failed." >&2
+    exit 1
+  fi
   cp "$AAB_SIGNED_FINAL" "$OUT_DIR/mizan-release-signed.aab"
 fi
 
