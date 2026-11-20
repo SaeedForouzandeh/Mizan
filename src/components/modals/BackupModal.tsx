@@ -3,6 +3,7 @@ import { CheckCircle2, Download, RotateCcw, Upload } from 'lucide-react';
 import { useLedger } from '../../context/LedgerContext';
 import { BUSINESS_TYPE_LABELS, type BusinessType } from '../../types/mizan';
 import { formatJalaliShortDate } from '../../utils/formatters';
+import { normalizeStoreName } from '../../utils/formatters';
 import { ModalFrame } from './ModalFrame';
 
 const BUSINESS_TYPES: BusinessType[] = [
@@ -102,7 +103,7 @@ export function BackupModal({ open, onClose }: BackupModalProps) {
 
   const handleSaveProfile = (e: React.FormEvent) => {
     e.preventDefault();
-    updateStoreProfile(storeName, businessType);
+    updateStoreProfile(normalizeStoreName(storeName), businessType);
   };
 
   const lastBackupAt = ledger?.profile.lastBackupAt;
@@ -196,6 +197,12 @@ export function BackupModal({ open, onClose }: BackupModalProps) {
             <input
               id="settings-store-name"
               type="text"
+              lang="fa"
+              dir="rtl"
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck={false}
               value={storeName}
               onChange={(e) => setStoreName(e.target.value)}
               className="w-full min-h-[44px] px-3.5 rounded-xl bg-white/85 dark:bg-[#1A1511] border border-amber-900/15 dark:border-amber-200/15 text-sm focus:outline-none focus:ring-2 focus:ring-[#9A5B13]"

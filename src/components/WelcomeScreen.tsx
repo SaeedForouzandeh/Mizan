@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react';
 import { ArrowLeft, Scale, Upload } from 'lucide-react';
 import { useLedger } from '../context/LedgerContext';
 import { BUSINESS_TYPE_LABELS, type BusinessType } from '../types/mizan';
+import { normalizeStoreName } from '../utils/formatters';
 
 const BUSINESS_TYPES: BusinessType[] = [
   'shop',
@@ -18,10 +19,20 @@ export function WelcomeScreen() {
   const [businessType, setBusinessType] = useState<BusinessType>('online');
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const nameInputRef = useRef<HTMLInputElement | null>(null);
+  // While the Persian/Arabic keyboard is composing a word (Gboard sends
+  // uncommitted composing text), do not push every keystroke into React
+  // state: re-rendering a controlled input mid-composition can reset the
+  // field in the Android WebView, so the typed Persian text is lost and
+  // submit sees an empty name while English (no composition) works fine.
+  const composingRef = useRef(false);
 
   const handleStart = () => {
     setError(null);
-    const chosenName = storeName.trim();
+    // Fallback to the live DOM value: if the IME composition has not
+    // committed into React state yet, the input still holds the real text.
+    const liveValue = nameInputRef.current?.value ?? '';
+    const chosenName = normalizeStoreName(liveValue || storeName);
     if (!chosenName) {
       setError('نام فروشگاه یا کسب‌وکار خود را بنویسید.');
       return;
@@ -81,10 +92,30 @@ export function WelcomeScreen() {
             </label>
             <input
               id="welcome-store-name"
+              ref={nameInputRef}
               type="text"
+              lang="fa"
+              dir="rtl"
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck={false}
               value={storeName}
+              onCompositionStart={() => {
+                composingRef.current = true;
+              }}
+              onCompositionEnd={(e) => {
+                composingRef.current = false;
+                setStoreName(e.currentTarget.value);
+                setError(null);
+              }}
               onChange={(e) => {
-                setStoreName(e.target.value);
+                // During IME composition the DOM holds uncommitted text;
+                // syncing state on every keystroke would re-render and
+                // wipe it. Sync once composition ends instead.
+                if (!composingRef.current) {
+                  setStoreName(e.target.value);
+                }
                 setError(null);
               }}
               placeholder="مثلاً: فروشگاه آفتاب"

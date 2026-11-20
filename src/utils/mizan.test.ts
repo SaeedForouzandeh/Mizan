@@ -15,6 +15,7 @@ import {
   getGreetingByHour,
   inputToToman,
   normalizeDigits,
+  normalizeStoreName,
   parseNumericInput,
 } from './formatters';
 import {
@@ -157,6 +158,20 @@ test('Money formatting uses clean تومان and ریال notation without هز�
   assert.equal(formatMoney(-450000, 'toman'), '−450,000 تومان');
   assert.equal(inputToToman(12000000, 'rial'), 1200000);
   assert.equal(parseNumericInput(normalizeDigits('۱,۲۵۰,۰۰۰')), 1250000);
+});
+
+test('Persian store names normalize Arabic Yeh/Kaf and never read as empty', () => {
+  // Many Android keyboards produce Arabic ي / ك; they must become Persian ی / ک.
+  assert.equal(normalizeStoreName('فروشگاه آفتاب'), 'فروشگاه آفتاب');
+  assert.equal(normalizeStoreName('فروشگاه آفتاب '), 'فروشگاه آفتاب');
+  assert.equal(normalizeStoreName('كافه ياس'), 'کافه یاس');
+  // Invisible characters at the edges must not make the name look empty.
+  assert.equal(normalizeStoreName(' فروشگاه آفتاب '), 'فروشگاه آفتاب');
+  assert.equal(normalizeStoreName('\u200Cفروشگاه آفتاب\u200C'), 'فروشگاه آفتاب');
+  assert.equal(normalizeStoreName('   '), '');
+  assert.equal(normalizeStoreName(''), '');
+  // ZWNJ inside a word is real Persian and must be kept.
+  assert.equal(normalizeStoreName('می‌خواهم'), 'می‌خواهم');
 });
 
 test('Online and in-person sale channels resolve appropriate default customer labels', () => {

@@ -19,6 +19,23 @@ export function parseNumericInput(input: string): number {
 }
 
 /**
+ * Normalizes a Persian store/business name for storage.
+ *
+ * - Converts Arabic Yeh/Kaf (ي / ك, which many Android keyboards produce)
+ *   to Persian Yeh/Kaf (ی / ک).
+ * - Strips invisible characters (zero-width joiner/non-joiner, BOM) and
+ *   whitespace from both ends, so a name typed with the Persian keyboard
+ *   is never treated as empty.
+ * - Keeps ZWNJ inside the name (e.g. «می‌خواهم») untouched.
+ */
+export function normalizeStoreName(input: string): string {
+  return input
+    .replace(/ي/g, 'ی')
+    .replace(/ك/g, 'ک')
+    .replace(/^[\s\u200B\u200C\u200D\uFEFF]+|[\s\u200B\u200C\u200D\uFEFF]+$/g, '');
+}
+
+/**
  * Formats integer/decimal numbers with Latin thousands separators for clean legibility
  * (e.g. "1,200,000").
  */

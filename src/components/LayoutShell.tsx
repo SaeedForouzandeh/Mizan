@@ -272,12 +272,15 @@ export function LayoutShell({
         className="lg:hidden pointer-events-none fixed bottom-0 inset-x-0 h-24 z-20 bg-gradient-to-t from-[#FAF6F0]/88 via-[#FAF6F0]/40 to-transparent dark:from-[#14110E]/92 dark:via-[#14110E]/45 dark:to-transparent"
       />
 
-      {/* Mobile Floating Golden Circular FAB -> Quick Inventory Access */}
+      {/* Mobile Floating Golden Circular FAB -> Quick Inventory Access.
+          Its bottom offset MUST include env(safe-area-inset-bottom): the
+          bottom nav grows taller by the safe-area on gesture-navigation
+          phones, so a fixed bottom value lets the nav slide over the FAB. */}
       <button
         type="button"
         onClick={() => onSelectTab('inventory')}
         aria-label="رفتن سریع به انبار"
-        className="lg:hidden fixed left-3.5 bottom-[5.45rem] z-30 w-12 h-12 rounded-full mizan-fab text-white flex items-center justify-center cursor-pointer"
+        className="lg:hidden fixed left-3.5 bottom-[calc(env(safe-area-inset-bottom)+6.75rem)] z-30 w-12 h-12 rounded-full mizan-fab text-white flex items-center justify-center cursor-pointer"
       >
         <Package className="w-5 h-5" aria-hidden="true" />
       </button>
@@ -321,7 +324,7 @@ export function LayoutShell({
         <div
           role="status"
           aria-live="polite"
-          className="fixed bottom-24 lg:bottom-6 left-4 lg:left-6 z-50 max-w-sm w-[calc(100%-2rem)]"
+          className="fixed bottom-[calc(env(safe-area-inset-bottom)+7rem)] lg:bottom-6 left-4 lg:left-6 z-50 max-w-sm w-[calc(100%-2rem)]"
         >
           <div className="mizan-float-glass rounded-full px-4 py-2.5 flex items-center justify-between gap-3">
             <span className="text-xs sm:text-sm font-medium pr-1">{toastMessage}</span>

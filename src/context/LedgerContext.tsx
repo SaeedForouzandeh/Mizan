@@ -25,7 +25,7 @@ import {
   restoreVoidedSaleBatches,
   simulateFifoSale,
 } from '../utils/fifo';
-import { createSafeId } from '../utils/formatters';
+import { createSafeId, normalizeStoreName } from '../utils/formatters';
 
 const LOCAL_LEDGER_KEY = 'mizan_store_ledger_v2';
 
@@ -119,16 +119,12 @@ const LEGACY_LOCAL_KEYS = ['mizan_local_ledger_v1', 'mizan_demo_ledger'];
 
 function isLegacyCafeDemoLedger(state: LedgerState): boolean {
   const ownerId = state.profile.ownerId ?? '';
-  const storeName = (state.profile.storeName ?? '').trim();
   const authMode = (state.profile as { authMode?: string }).authMode;
-  return (
-    authMode === 'demo' ||
-    ownerId === 'demo-cafe-mizan' ||
-    ownerId.startsWith('demo_') ||
-    storeName.includes('کافه رُستری میزان') ||
-    storeName.includes('کافه رستری میزان') ||
-    storeName === 'کافه میزان'
-  );
+  // Identify the old demo ledger only by its owner/auth markers. Never by
+  // store name: a real shop named e.g. «کافه میزان» would otherwise have
+  // its saved ledger deleted on the next launch and be asked for the
+  // business name again, while an English name would pass.
+  return authMode === 'demo' || ownerId === 'demo-cafe-mizan' || ownerId.startsWith('demo_');
 }
 
 function readStoredLedger(): LedgerState | null {
@@ -211,7 +207,7 @@ export function LedgerProvider({ children }: { children: React.ReactNode }) {
   // --- Setup & Backup ---
   const startStore = useCallback(
     (storeName: string, businessType: BusinessType) => {
-      const cleanName = storeName.trim() || 'میزان';
+      const cleanName = normalizeStoreName(storeName) || 'میزان';
       const uid = createSafeId('store');
       const nextState: LedgerState = {
         profile: {
@@ -293,7 +289,7 @@ export function LedgerProvider({ children }: { children: React.ReactNode }) {
 
   const updateStoreProfile = useCallback(
     (storeName: string, businessType: BusinessType) => {
-      const trimmed = storeName.trim() || 'میزان';
+      const trimmed = normalizeStoreName(storeName) || 'میزان';
       mutateLedger((prev) => ({
         ...prev,
         profile: { ...prev.profile, storeName: trimmed, businessType },
